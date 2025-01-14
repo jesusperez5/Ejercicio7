@@ -58,6 +58,9 @@ public class MainActivity extends AppCompatActivity implements TareaAdapter.OnIt
     @Override
     public void onItemClick(Tarea tarea) {
         Toast.makeText(this, tarea.getTexto(), Toast.LENGTH_SHORT).show();
+        MyButtomSheetFragment buttomSheet = new MyButtomSheetFragment();
+        buttomSheet.show(getSupportFragmentManager(), buttomSheet.getTag());
+
     }
 
     @Override
