@@ -1,11 +1,13 @@
 package com.example.ejercicio7;
 
+import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 
-public class Tarea {
+public class Tarea implements Serializable {
     private Subjects asignaturaTarea;
     private String texto;
-    private Date fecha;
+    private LocalDate fecha;
     private State estado;
 
     public enum Subjects{
@@ -16,7 +18,7 @@ public class Tarea {
         PENDIENTE, COMPLETADO
     }
 
-    public Tarea(Subjects asignaturaTarea, Date fecha, String texto, State estado) {
+    public Tarea(Subjects asignaturaTarea, LocalDate fecha, String texto, State estado) {
         this.asignaturaTarea = asignaturaTarea;
         this.fecha = fecha;
         this.texto = texto;
@@ -39,11 +41,11 @@ public class Tarea {
         this.texto = texto;
     }
 
-    public Date getFecha() {
+    public LocalDate getFecha() {
         return fecha;
     }
 
-    public void setFecha(Date fecha) {
+    public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
     }
 

@@ -19,10 +19,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity implements TareaAdapter.OnItemClickListener, Add.AddDialogListener {
+public class MainActivity extends AppCompatActivity implements TareaAdapter.OnItemClickListener, Add.AddDialogListener, MyButtomSheetFragment.EditListener, Edit.EditDialogListener{
 
     private ArrayList<Tarea> tareas;
     private TareaAdapter tareaAdapter;
+    private MyButtomSheetFragment buttomSheet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,8 +36,7 @@ public class MainActivity extends AppCompatActivity implements TareaAdapter.OnIt
             return insets;
         });
 
-        tareas = new ArrayList<>(Arrays.asList( new Tarea(Tarea.Subjects.AD, new Date(2000,1,1), "Tarea Ad", Tarea.State.COMPLETADO),
-                new Tarea(Tarea.Subjects.AD, new Date(2000,1,1), "Tarea Ad", Tarea.State.COMPLETADO)));
+        tareas = new ArrayList<>();
         tareaAdapter = new TareaAdapter(tareas, this);
         RecyclerView recyclerView = findViewById(R.id.recyclerTareas);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements TareaAdapter.OnIt
     @Override
     public void onItemClick(Tarea tarea) {
         Toast.makeText(this, tarea.getTexto(), Toast.LENGTH_SHORT).show();
-        MyButtomSheetFragment buttomSheet = new MyButtomSheetFragment();
+        buttomSheet = new MyButtomSheetFragment(tarea);
         buttomSheet.show(getSupportFragmentManager(), buttomSheet.getTag());
 
     }
@@ -67,5 +67,29 @@ public class MainActivity extends AppCompatActivity implements TareaAdapter.OnIt
     public void onDialogPositiveClick(Tarea tarea) {
         Toast.makeText(this, tarea.getTexto(), Toast.LENGTH_SHORT).show();
         tareaAdapter.addTask(tarea);
+    }
+
+    @Override
+    public void editTask(Tarea tarea, String action) {
+        if(action == "borrar"){
+            System.out.println("borrar");
+            tareas.remove(tarea);
+            this.tareaAdapter.removeTask(tarea);
+            buttomSheet.dismiss();
+        } else if(action == "editar"){
+            Edit dialogFragment = new Edit();
+            dialogFragment.show(getSupportFragmentManager(), "");
+            dialogFragment.setTarea(tarea);
+            buttomSheet.dismiss();
+        } else if(action == "completado"){
+           this.tareaAdapter.updateToCompleated(tarea);
+            buttomSheet.dismiss();
+        }
+
+    }
+
+    @Override
+    public void onEditDialogPositiveClick(Tarea tarea, Tarea tareaNueva) {
+        this.tareaAdapter.updateTask(tarea, tareaNueva);
     }
 }

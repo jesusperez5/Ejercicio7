@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHolder> {
@@ -37,7 +39,8 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
         holder.subject.setText(tarea.getAsignaturaTarea().toString());
         holder.text.setText(tarea.getTexto());
         holder.state.setText(tarea.getEstado().toString());
-        holder.date.setText("ads");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        holder.date.setText(tarea.getFecha().format(formatter));
     }
 
     @Override
@@ -46,8 +49,30 @@ public class TareaAdapter extends RecyclerView.Adapter<TareaAdapter.TareaViewHol
     }
 
     public void addTask(Tarea tarea){
+        System.out.println(tarea.getFecha());
         tareas.add(tarea);
         notifyItemInserted(tareas.size() - 1);
+    }
+
+    public void removeTask(Tarea tarea){
+        int position = tareas.indexOf(tarea);
+        tareas.remove(tarea);
+        notifyItemRemoved(position);
+    }
+
+    public void updateToCompleated (Tarea tarea){
+        int position = tareas.indexOf(tarea);
+        tareas.get(position).setEstado(Tarea.State.COMPLETADO);
+        notifyItemChanged(position);
+    }
+
+    public void updateTask (Tarea tarea, Tarea tareaNueva){
+        int position = tareas.indexOf(tarea);
+        tareas.get(position).setEstado(Tarea.State.PENDIENTE);
+        tareas.get(position).setAsignaturaTarea(tareaNueva.getAsignaturaTarea());
+        tareas.get(position).setFecha(tareaNueva.getFecha());
+        tareas.get(position).setTexto(tareaNueva.getTexto());
+        notifyItemChanged(position);
     }
 
     public class TareaViewHolder extends RecyclerView.ViewHolder{

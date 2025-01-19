@@ -10,32 +10,38 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
-public class Add extends DialogFragment {
+public class Edit extends DialogFragment {
 
-    public interface AddDialogListener {
-        void onDialogPositiveClick(Tarea tarea);
+    public interface EditDialogListener {
+        void onEditDialogPositiveClick(Tarea tarea, Tarea tareaNueva);
     }
 
-    private AddDialogListener listener;
+    private Edit.EditDialogListener listener;
 
     private EditText inputDate;
     private EditText inputTask;
     private Spinner inputSubject;
+
+    private Tarea tarea;
+
+    public void setTarea(Tarea tarea) {
+        this.tarea = tarea;
+    }
 
     @NonNull
     @Override
@@ -47,22 +53,21 @@ public class Add extends DialogFragment {
         View view = layoutInflater.inflate(R.layout.add_fragment, null);
         builder.setView(view);
 
-
-
         inputDate = view.findViewById(R.id.dateInput);
         inputSubject = view.findViewById(R.id.subjectToggle);
         inputTask = view.findViewById(R.id.inputTask);
+
         List<String> opciones = Arrays.asList(
                 Tarea.Subjects.AD.toString(), Tarea.Subjects.DI.toString(), Tarea.Subjects.EIE.toString(),
                 Tarea.Subjects.PDP.toString(), Tarea.Subjects.PMDM.toString()
         );
-
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(),
                 android.R.layout.simple_spinner_dropdown_item,
                 opciones
         );
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
         inputSubject.setAdapter(adapter);
         inputDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,16 +76,21 @@ public class Add extends DialogFragment {
             }
         });
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        inputDate.setText(tarea.getFecha().format(formatter));
+        inputTask.setText(tarea.getTexto());
+        inputSubject.setSelection(opciones.indexOf(tarea.getAsignaturaTarea().toString()));
+
+
+
         builder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         if(inputDate.getText() != null && inputTask.getText() != null){
                             try {
                                 String date = String.valueOf(inputDate.getText());
-                                System.out.println(date);
                                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
                                 LocalDate parsedDate = LocalDate.parse(date, formatter);
-                                System.out.println();
                                 String task = String.valueOf(inputTask.getText());
                                 String subjectString = String.valueOf(inputSubject.getSelectedItem().toString());
                                 Tarea.Subjects subject = Tarea.Subjects.AD;
@@ -90,13 +100,13 @@ public class Add extends DialogFragment {
                                         subject = asignatura;
                                     }
                                 }
-                                Tarea tarea = new Tarea(
+                                Tarea tareaNueva = new Tarea(
                                         subject,
                                         parsedDate,
                                         task,
                                         Tarea.State.PENDIENTE
                                 );
-                                listener.onDialogPositiveClick(tarea);
+                                listener.onEditDialogPositiveClick(tarea, tareaNueva);
                             } catch (Exception e){
                                 e.printStackTrace();
                             }
@@ -106,9 +116,13 @@ public class Add extends DialogFragment {
                 })
                 .setNegativeButton("Rechazar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Add.this.getDialog().cancel();
+                        Edit.this.getDialog().cancel();
                     }
                 });
+
+
+
+
         return builder.create();
 
     }
@@ -116,7 +130,7 @@ public class Add extends DialogFragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        listener = (AddDialogListener) context;
+        listener = (Edit.EditDialogListener) context;
     }
 
     private void mostrarDatePickerDialog() {
